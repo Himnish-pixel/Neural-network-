@@ -1,0 +1,84 @@
+import numpy as np
+import pandas as pd
+
+# Load data
+train_df = pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
+X_train = train_df.drop('label', axis=1).values / 255.0
+y_train = train_df['label'].values
+
+# One-hot encode
+y_onehot = np.zeros((y_train.size, 10))
+y_onehot[np.arange(y_train.size), y_train] = 1
+
+# Network architecture
+input_size = 784
+h1 = 64
+h2 = 32
+output_size = 10
+
+# Weights & biases
+rng = np.random.default_rng()
+W1 = rng.normal(0, 0.01, (input_size, h1))
+W2 = rng.normal(0, 0.01, (h1, h2))
+W3 = rng.normal(0, 0.01, (h2, output_size))
+
+b1 = np.zeros((1, h1))
+b2 = np.zeros((1, h2))
+b3 = np.zeros((1, output_size))
+
+# Activation funcs
+def relu(x): return np.maximum(0, x)
+def relu_derivative(x): return (x > 0).astype(float)
+
+def softmax(x):
+    exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))
+    return exp_x / np.sum(exp_x, axis=1, keepdims=True)
+
+def cross_entropy(pred, actual):
+    eps = 1e-8
+    return -np.mean(np.sum(actual * np.log(pred + eps), axis=1))
+
+# Hyperparams
+lr = 0.001
+epochs = 1000
+
+# Training loop
+for epoch in range(epochs):
+
+    # Forward pass
+    z1 = X_train @ W1 + b1
+    a1 = relu(z1)
+
+    z2 = a1 @ W2 + b2
+    a2 = relu(z2)
+
+    z3 = a2 @ W3 + b3
+    output = softmax(z3)
+
+    # Loss
+    loss = cross_entropy(output, y_onehot)
+
+    # Backpropagation
+    d3 = (output - y_onehot)                # (60000 x 10)
+    dW3 = a2.T @ d3                         # (32 x 10)
+    db3 = np.sum(d3, axis=0, keepdims=True)
+
+    d2 = (d3 @ W3.T) * relu_derivative(z2)  # (60000 x 32)
+    dW2 = a1.T @ d2
+    db2 = np.sum(d2, axis=0, keepdims=True)
+
+    d1 = (d2 @ W2.T) * relu_derivative(z1)  # (60000 x 64)
+    dW1 = X_train.T @ d1
+    db1 = np.sum(d1, axis=0, keepdims=True)
+
+    # Gradient descent update
+    W3 -= lr * dW3
+    b3 -= lr * db3
+    W2 -= lr * dW2
+    b2 -= lr * db2
+    W1 -= lr * dW1
+    b1 -= lr * db1
+
+    # Display progress
+    if epoch % 100 == 0:
+        print(f"Epoch {epoch} | Loss = {loss:.4f}")
