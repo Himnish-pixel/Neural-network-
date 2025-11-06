@@ -1,124 +1,94 @@
-# Neural-network-
-this is a digit recognizer artificial intelligence training module using the mnist database along with forward and backword propagation and updating the weights as required 
+Neural Network Digit Recognizer (NumPy Only)
+📌 Overview
+
+This project implements a fully connected neural network from scratch, using only NumPy, to classify handwritten digits from the MNIST Digit Recognizer Dataset.
+The goal is to demonstrate how forward propagation, backpropagation, gradient descent, activation functions, and loss computation work internally—without relying on deep-learning libraries like TensorFlow or PyTorch.
+
+✨ Features
+
+✅ Built completely from scratch using NumPy
+✅ Works on the Kaggle Digit Recognizer dataset
+✅ Supports 2 hidden layers
+✅ Uses ReLU activation for hidden layers
+✅ Uses Softmax for output
+✅ Uses Cross-Entropy Loss
+✅ Trains using batch gradient descent
+✅ Outputs loss every 100 epochs
+✅ Easy-to-understand code structure
+
+🧠 Neural Network Architecture
+
+The network uses the following structure:
+
+Layer	Type	Size
+Input Layer	Flattened pixels	784 neurons
+Hidden Layer 1	Dense + ReLU	64 neurons
+Hidden Layer 2	Dense + ReLU	32 neurons
+Output Layer	Dense + Softmax	10 neurons (digits 0-9)
+📂 Dataset
+
+You must download the Kaggle MNIST dataset:
+
+train.csv — contains 42k images + labels
+
+test.csv — contains images (for final evaluation)
+
+Each image is 28×28 pixels flattened into 784 columns.
+
+🚀 Training Workflow
+
+Load dataset using Pandas
+
+Normalize pixel values to [0,1]
+
+Convert labels into one-hot encoded vectors
+
+Initialize weights & biases
+
+Perform:
+
+Forward propagation
+
+Loss calculation
+
+Backpropagation
+
+Gradient descent update
+
+Repeat for the given number of epochs
+
+🛠️ Technologies Used
+
+NumPy → Total math backend
+
+Pandas → Data loading
+
+Matplotlib (optional) → Visualization
+
+No ML libraries are used—everything is handcrafted.
+
+📈 Example Training Output
+Epoch 0   | Loss: 2.3015
+Epoch 100 | Loss: 0.7421
+Epoch 200 | Loss: 0.4238
+Epoch 300 | Loss: 0.2890
+...
+
+📑 How to Run
+pip install numpy pandas matplotlib
+python train_digit_recognizer.py
 
 
-# This Python 3 environment comes with many helpful analytics libraries installed
-# It is defined by the kaggle/python Docker image: https://github.com/kaggle/docker-python
-# For example, here's several helpful packages to load
+Make sure your dataset path (train.csv) is correct.
 
-import numpy as np # linear algebra
-import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+📌 Future Improvements
 
-# Input data files are available in the read-only "../input/" directory
-# For example, running this (by clicking run or pressing Shift+Enter) will list all files under the input directory
+Add mini-batch training
 
-import os
-for dirname, _, filenames in os.walk('/kaggle/input'):
-    for filename in filenames:
-        print(os.path.join(dirname, filename))
+Add Adam optimizer
 
-# You can write up to 20GB to the current directory (/kaggle/working/) that gets preserved as output when you create a version using "Save & Run All" 
-# You can also write temporary files to /kaggle/temp/, but they won't be saved outside of the current session
+Add Dropout
 
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as pt
+Evaluate accuracy on test set
 
-data=pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
-print(data)
-
-row,col=data.shape
-print(row,col)
-
-rng=np.random.default_rng()
-
-def weights(rows,cols):
-    weights=rng.random((rows,cols))
-    print(weights)
-
-weights(row,col)
-
-weights_input_hidden=np.random.randn(784,64)
-print("----")
-print("----")
-weights_hidden_hidden2=np.random.randn(64,32)
-print("----")
-print("----")
-weights_hidden_output=np.random.randn(32,10)
-print("----")
-print("----")
-
-bias_hidden1 = np.zeros(64)  # Bias for first hidden layer (64 neurons)
-bias_hidden2 = np.zeros(32)  # Bias for second hidden layer (32 neurons)
-bias_output = np.zeros(10)  # Bias for output layer (10 neurons)
-
-learning_rate=0.04
-
-def relu(x):
-    return np.maximum(0,x)
-
-def relu_derivative(x):
-    return (x > 0).astype(float)
-
-def softmax(x):  # You were missing this!
-    exp_x = np.exp(x - np.max(x, axis=1, keepdims=True))  # stability trick
-    return exp_x / np.sum(exp_x, axis=1, keepdims=True)
-
-def cross_entropy_loss(x,y):
-    eps=1e-8
-    loss=-np.mean(np.sum(x*np.log(y+eps),axis=0))
-    return loss
-
-train_df = pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
-X_train = train_df.drop('label', axis=1).values / 255.0  # Normalize input
-y_train = train_df['label'].values
-
-y_onehot = np.zeros((y_train.size, 10))
-y_onehot[np.arange(y_train.size), y_train] = 1
-
-actual_output=pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
-
-epoche=1000
-
-for i in range(epoche):
-    hidden1=relu(np.dot(X_train,weights_input_hidden)+bias_hidden1)
-    hidden2=relu(np.dot(hidden1,weights_hidden_hidden2)+bias_hidden2)
-    predicted_output=softmax(np.dot(hidden2,weights_hidden_output)+bias_output)
-
-x_train=pd.read_csv('/kaggle/input/digit-recognizer/train.csv')
-x_data=x_train.drop('label').values/255.0
-y_data=x_train['label'].values
-
-y_oneshot=np.zeros((y_train.size,10))
-y_train[np.arrange(y_train.size,y_train)]=1
-
-loss=cross_entropy_loss(y_oneshot,predicted_output)
-
-for i in range(1000):
-    error_loss=predicted_output-y_oneshot
-    grad_weigths_output=np.dot(hidden2,error_loss)
-    grad_biases_output=np.sum(error_loss)
-    
-    error_hidden2=np.dot(error_loss,weight_hidden_output.T)
-    relu_derivative(error_hidden2)
-    grad_weight_2=np.dot(hidden1.T,error_hidden2)
-    grad_biases_2=np.sum(error_hidden2,axis=1)
-    
-    error_hidden1=np.dot(error_loss,weight_hidden_hidden2.T)
-    relu_derivative(error_hidden1)
-    grad_weight_1=np.dot(x_train,error_hidden1)
-    grad_biases_1=np.sum(error_hidden1,axis=1)
-
-    weight_update_input-=(learning_rate*error_hidden1)
-    weight_update_hidden-=(learning_rate*error_hidden2)
-    weight_update_output-=(learning_rate*error_ouput)
-    
-    
-    biases_update_input-=(learning_rate*grad_biases_1)
-    biases_update_hidden-=(learning_rate*grad_biases_2)
-    biases_update_output-=(learning_rate*grad_biases_output)
-    
-
-    if i % 100 == 0:
-        print(f"Epoch {i}, Loss: {loss:.4f}")
-
+Save & load model weights
